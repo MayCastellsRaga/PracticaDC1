@@ -1,0 +1,19 @@
+version: "3.7"
+
+#docker exec  kafka-docker-kafka-1  kafka-topics.sh --create --topic raw_temperature -partitions 3 --replication-factor 1 --bootstrap-server localhost:9092
+#docker exec  kafka-docker-kafka-1  kafka-topics.sh --create --topic clean_temperature -partitions 3 --replication-factor 1 --bootstrap-server localhost:9092
+#docker exec  kafka-docker-kafka-1  kafka-topics.sh --create --topic comfort_temperature -partitions 3 --replication-factor 1 --bootstrap-server localhost:9092
+services:
+  print_results:
+    build: print_results
+    network_mode: "host"
+  comfort_profile:
+    build: comfort_profile
+    network_mode: "host"
+  clean_processor:
+    build: clean_processor
+    network_mode: "host"
+  producer_readings:
+    build: reading_temp
+    network_mode: "host"
+
