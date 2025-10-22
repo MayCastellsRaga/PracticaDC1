@@ -1,12 +1,7 @@
 import paho.mqtt.subscribe as subscribe
-import paho.mqtt.client as mqtt
 
 
 def on_message_print(client, userdata, message):
     print("%s %s" % (message.topic, message.payload))
-    client = mqtt.Client()
-    client.connect("mosquitto_cloud", 1883, 60)
-
-
 subscribe.callback(on_message_print, "#", hostname="mosquitto")
 

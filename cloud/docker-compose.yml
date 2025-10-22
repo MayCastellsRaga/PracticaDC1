@@ -1,0 +1,24 @@
+version: "3.9"
+services:
+  mosquitto_cloud:
+    image: eclipse-mosquitto:1.6.12
+    ports:
+     - "1883:1883"
+    networks:
+      - cloud_net
+  room1:
+    build: ingestor
+    environment:
+      - MQTT_HOST=mosquitto_cloud
+      - SENSOR_TOPIC_DATA=room1/temperature
+      - SENSOR_TOPIC_STATUS=room1/heatpump
+    depends_on:
+      - mosquitto_cloud
+    networks:
+      - cloud_net
+networks:
+  cloud_net:
+    driver: bridge
+  global_net:
+    external: true
+
