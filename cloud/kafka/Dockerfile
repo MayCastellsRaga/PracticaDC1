@@ -1,6 +1,6 @@
 FROM python:3.10.0-slim
-WORKDIR /checker
+WORKDIR /kafka
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
-COPY gateway.py gateway.py
-CMD python3 -u gateway.py
+COPY DataCleaner.py DataCleaner.py
+CMD python3 -u DataCleaner.py
