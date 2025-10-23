@@ -3,9 +3,14 @@ services:
   mosquitto_cloud:
     image: eclipse-mosquitto:1.6.12
     ports:
-     - "1883:1883"
+     - "1884:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto_cloud/data:/mosquitto/data
+      - ./mosquitto_cloud/log:/mosquitto/log
     networks:
       - cloud_net
+      - global_net
   room1:
     build: ingestor
     environment:
@@ -16,6 +21,20 @@ services:
       - mosquitto_cloud
     networks:
       - cloud_net
+  influxdb:
+    image: influxdb:2.4.0
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=eloi
+      - DOCKER_INFLUXDB_INIT_PASSWORD=12341234
+      - DOCKER_INFLUXDB_INIT_ORG=UDL
+      - DOCKER_INFLUXDB_INIT_BUCKET=measurement
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=secrettoken
+    volumes:
+      - ./influxdb:/var/lib/influxdb2
+
 networks:
   cloud_net:
     driver: bridge
