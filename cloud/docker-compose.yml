@@ -3,9 +3,14 @@ services:
   mosquitto_cloud:
     image: eclipse-mosquitto:1.6.12
     ports:
-     - "1884:1884"
+     - "1884:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto_cloud/data:/mosquitto/data
+      - ./mosquitto_cloud/log:/mosquitto/log
     networks:
       - cloud_net
+      - global_net
   room1:
     build: ingestor
     environment:
@@ -16,23 +21,20 @@ services:
       - mosquitto_cloud
     networks:
       - cloud_net
-  zookeeper:
-    image: docker.io/bitnamilegacy/zookeeper:3.8
+  influxdb:
+    image: influxdb:2.4.0
     ports:
-      - "2181:2181"
+      - "8086:8086"
     environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
-  kafka:
-    image: docker.io/bitnamilegacy/kafka:3
-    ports:
-      - "9092:9092"
-    environment:
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - ALLOW_ANONYMOUS_LOGIN=yes
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
-    depends_on:
-        - zookeeper
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=eloi
+      - DOCKER_INFLUXDB_INIT_PASSWORD=12341234
+      - DOCKER_INFLUXDB_INIT_ORG=UDL
+      - DOCKER_INFLUXDB_INIT_BUCKET=measurement
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=secrettoken
+    volumes:
+      - ./influxdb:/var/lib/influxdb2
+
 networks:
   cloud_net:
     driver: bridge
