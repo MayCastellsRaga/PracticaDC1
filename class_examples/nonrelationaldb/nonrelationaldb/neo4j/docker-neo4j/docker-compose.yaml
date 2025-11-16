@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  neo4j-database:
+    image: neo4j:4.4.12-community
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - /Users/eloigabal/Desktop/Distributed Computing/2425/examples/docker_data/neo4j_data/data:/data
+    environment:
+      - NEO4J_AUTH=neo4j/test

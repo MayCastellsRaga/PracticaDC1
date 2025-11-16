@@ -2,6 +2,8 @@ version: "3.9"
 services:
   gateway:
     build: gateway
+    environment:
+      - PROJECT_NAME=${COMPOSE_PROJECT_NAME}
     depends_on:
       - mosquitto
     networks:
