@@ -1,5 +1,35 @@
 version: "3.9"
 services:
+  zookeeper:
+    image: docker.io/bitnamilegacy/zookeeper:3.8
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - cloud_net
+  kafka:
+    image: docker.io/bitnamilegacy/kafka:3.3
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+    depends_on:
+      - zookeeper
+    networks:
+      - cloud_net
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
   mosquitto_cloud:
     image: eclipse-mosquitto:1.6.12
     ports:
@@ -11,29 +41,60 @@ services:
     networks:
       - cloud_net
       - global_net
-  room1:
+  ingestor:
     build: ingestor
     environment:
       - MQTT_HOST=mosquitto_cloud
       - SENSOR_TOPIC_DATA=room1/temperature
       - SENSOR_TOPIC_STATUS=room1/heatpump
     depends_on:
-      - mosquitto_cloud
+      mosquitto_cloud:
+        condition: service_started
+      kafka:
+        condition: service_healthy
     networks:
       - cloud_net
+
   influxdb:
     image: influxdb:2.4.0
     ports:
       - "8086:8086"
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=eloi
+      - DOCKER_INFLUXDB_INIT_USERNAME=mayandanna
       - DOCKER_INFLUXDB_INIT_PASSWORD=12341234
       - DOCKER_INFLUXDB_INIT_ORG=UDL
-      - DOCKER_INFLUXDB_INIT_BUCKET=measurement
+      - DOCKER_INFLUXDB_INIT_BUCKET=raw_data
+      - DOCKER_INFLUXDB_INIT_BUCKET=clean_data
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=secrettoken
     volumes:
       - ./influxdb:/var/lib/influxdb2
+    networks:
+      - cloud_net
+
+  save_data:
+    build: pipelines/save_data
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=secrettoken
+      - INFLUXDB_ORG=UDL
+      - INFLUXDB_BUCKET=raw_data
+      - INFLUXDB_BUCKET=clean_data
+    depends_on:
+      influxdb:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - cloud_net
+
+  clean_data:
+    build: pipelines/clean_data
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - cloud_net
 
 networks:
   cloud_net:

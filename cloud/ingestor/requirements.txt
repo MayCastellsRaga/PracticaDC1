@@ -1,3 +1,4 @@
 pandas
 openpyxl==3.0.10
 paho-mqtt==1.6.1
+kafka-python==2.2.15
