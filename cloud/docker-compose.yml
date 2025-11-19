@@ -95,7 +95,19 @@ services:
         condition: service_healthy
     networks:
       - cloud_net
-
+  actuate:
+    build: pipelines/actuate
+    environment:
+      - MQTT_HOST=mosquitto_cloud
+      - SENSOR_TOPIC_DATA=room1/temperature
+      - SENSOR_TOPIC_STATUS=room1/heatpump
+    depends_on:
+      mosquitto_cloud:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - cloud_net
 networks:
   cloud_net:
     driver: bridge
