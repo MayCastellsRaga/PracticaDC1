@@ -4,6 +4,7 @@ services:
     build: gateway
     environment:
       - PROJECT_NAME=${COMPOSE_PROJECT_NAME}
+      - MQTT_HOST=mosquitto
     depends_on:
       - mosquitto
     networks:
