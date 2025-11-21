@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clean-data
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clean-data
+  template:
+    metadata:
+      labels:
+        app: clean-data
+    spec:
+      containers:
+      - name: clean-data
+        image: clean_data:latest
+        ports:
+        - containerPort: 5002
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clean-data
+spec:
+  selector:
+    app: clean-data
+  ports:
+    - protocol: TCP
+      port: 5002
+      targetPort: 5002

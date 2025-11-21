@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mosquitto-cloud
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mosquitto-cloud
+  template:
+    metadata:
+      labels:
+        app: mosquitto-cloud
+    spec:
+      containers:
+      - name: mosquitto
+        image: eclipse-mosquitto:1.6.12
+        ports:
+        - containerPort: 1883
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mosquitto-cloud
+spec:
+  selector:
+    app: mosquitto-cloud
+  ports:
+    - protocol: TCP
+      port: 1883
+      targetPort: 1883

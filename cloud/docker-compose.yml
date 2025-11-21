@@ -66,6 +66,7 @@ services:
       - DOCKER_INFLUXDB_INIT_ORG=UDL
       - DOCKER_INFLUXDB_INIT_BUCKET=raw_data
       - DOCKER_INFLUXDB_INIT_BUCKET=clean_data
+      - DOCKER_INFLUXDB_INIT_BUCKET=aggregate_data
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=secrettoken
     volumes:
       - ./influxdb:/var/lib/influxdb2
@@ -104,6 +105,35 @@ services:
     depends_on:
       mosquitto_cloud:
         condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - cloud_net
+  aggregate:
+    build: pipelines/aggregate
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=secrettoken
+      - INFLUXDB_ORG=UDL
+      - INFLUXDB_BUCKET=aggregate_data
+    depends_on:
+      influxdb:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - cloud_net
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8080:8080
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    depends_on:
       kafka:
         condition: service_healthy
     networks:

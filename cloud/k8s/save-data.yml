@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: save-data
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: save-data
+  template:
+    metadata:
+      labels:
+        app: save-data
+    spec:
+      containers:
+      - name: save-data
+        image: save_data:latest
+        env:
+        - name: INFLUXDB_URL
+          value: "http://influxdb:8086"
+        - name: INFLUXDB_TOKEN
+          value: "secrettoken"
+        - name: INFLUXDB_ORG
+          value: "UDL"
+        - name: INFLUXDB_BUCKET
+          value: "raw_data"
+        - name: INFLUXDB_BUCKET_CLEAN
+          value: "clean_data"
+        ports:
+        - containerPort: 5001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: save-data
+spec:
+  selector:
+    app: save-data
+  ports:
+    - protocol: TCP
+      port: 5001
+      targetPort: 5001

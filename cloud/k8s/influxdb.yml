@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: influxdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: influxdb
+  template:
+    metadata:
+      labels:
+        app: influxdb
+    spec:
+      containers:
+      - name: influxdb
+        image: influxdb:2.4.0
+        ports:
+        - containerPort: 8086
+        env:
+        - name: DOCKER_INFLUXDB_INIT_MODE
+          value: setup
+        - name: DOCKER_INFLUXDB_INIT_USERNAME
+          value: mayandanna
+        - name: DOCKER_INFLUXDB_INIT_PASSWORD
+          value: 12341234
+        - name: DOCKER_INFLUXDB_INIT_ORG
+          value: UDL
+        - name: DOCKER_INFLUXDB_INIT_BUCKET
+          value: raw_data
+        - name: DOCKER_INFLUXDB_INIT_BUCKET
+          value: clean_data
+        - name: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
+          value: secrettoken
+        volumeMounts:
+        - name: influxdb-storage
+          mountPath: /var/lib/influxdb2
+      volumes:
+      - name: influxdb-storage
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: influxdb
+spec:
+  selector:
+    app: influxdb
+  ports:
+    - protocol: TCP
+      port: 8086
+      targetPort: 8086
