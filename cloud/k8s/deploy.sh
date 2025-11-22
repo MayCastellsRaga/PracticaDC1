@@ -66,7 +66,11 @@ kubectl apply -f aggregate.yml
 echo "Desplegant Ingress..."
 kubectl apply -f ingress.yml
 
-# 8. Mostrar estat
+# 8. Desplegar Kafka UI
+echo "Desplegant Kafka UI..."
+kubectl apply -f kafka-ui.yml
+
+# 9. Mostrar estat
 echo ""
 echo "Desplegament completat!"
 echo ""
@@ -80,3 +84,7 @@ kubectl get services
 echo ""
 echo "Ingress:"
 kubectl get ingress
+
+echo " K8s Dashboard: http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/http:kubernetes-dashboard:/proxy/"
+echo " InfluxDB:      http://localhost:8086 (user: mayandanna / pass: 12341234)"
+echo " Kafka UI:      http://localhost:8080"
