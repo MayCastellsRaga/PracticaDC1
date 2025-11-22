@@ -16,7 +16,22 @@ INFLUXDB_BUCKET_CLEAN = os.environ.get('INFLUXDB_BUCKET_CLEAN', 'clean_data')
 
 # Set up InfluxDB client
 client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
+buckets_api = client.buckets_api()
 write_api = client.write_api()
+
+# Create buckets if they don't exist
+for bucket_name in [INFLUXDB_BUCKET_RAW, INFLUXDB_BUCKET_CLEAN]:
+    try:
+        bucket = buckets_api.find_bucket_by_name(bucket_name)
+        if bucket is None:
+            logging.info(f"Creating bucket {bucket_name}")
+            org_id = client.organizations_api().find_organizations(org=INFLUXDB_ORG)[0].id
+            buckets_api.create_bucket(bucket_name=bucket_name, org_id=org_id)
+            logging.info(f"Bucket {bucket_name} created successfully")
+        else:
+            logging.info(f"Bucket {bucket_name} already exists")
+    except Exception as e:
+        logging.warning(f"Could not check/create bucket {bucket_name}: {e}")
 
 consumer = KafkaConsumer(
     'raw', 'clean',
