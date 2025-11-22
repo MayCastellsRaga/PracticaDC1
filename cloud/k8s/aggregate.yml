@@ -1,43 +1,41 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: save-data
+  name: aggregate
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: save-data
+      app: aggregate
   template:
     metadata:
       labels:
-        app: save-data
+        app: aggregate
     spec:
       containers:
-      - name: save-data
-        image: save_data:latest
+      - name: aggregate
+        image: aggregate:latest
         imagePullPolicy: Never
         env:
+        - name: KAFKA_BROKER
+          value: "kafka:9092"
         - name: INFLUXDB_URL
           value: "http://influxdb:8086"
         - name: INFLUXDB_TOKEN
           value: "secrettoken"
         - name: INFLUXDB_ORG
           value: "UDL"
-        - name: INFLUXDB_BUCKET
-          value: "raw_data"
-        - name: INFLUXDB_BUCKET_CLEAN
-          value: "clean_data"
-        ports:
-        - containerPort: 5001
+        - name: INFLUXDB_BUCKET_AGGREGATE
+          value: "aggregate_data"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: save-data
+  name: aggregate
 spec:
   selector:
-    app: save-data
+    app: aggregate
   ports:
     - protocol: TCP
-      port: 5001
-      targetPort: 5001
+      port: 5004
+      targetPort: 5004

@@ -15,6 +15,7 @@ spec:
       containers:
       - name: ingestor
         image: ingestor:latest
+        imagePullPolicy: Never
         env:
         - name: MQTT_HOST
           value: "mosquitto-cloud"

@@ -15,6 +15,7 @@ spec:
       containers:
       - name: clean-data
         image: clean_data:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 5002
 ---
