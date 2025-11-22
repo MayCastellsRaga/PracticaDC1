@@ -21,10 +21,14 @@ if ! minikube status &> /dev/null; then
     echo "Iniciant Minikube..."
     minikube start --driver=docker
 else
-    echo "Minikube ja està en marxa"
+echo "Minikube ja està en marxa"
 fi
 
-# 3. Configurar Docker per usar el daemon de Minikube
+# 3. Habilitar Ingress addon
+echo "Habilitant Ingress NGINX..."
+minikube addons enable ingress
+
+# 4. Configurar Docker per usar el daemon de Minikube
 echo "Configurant Docker per usar Minikube..."
 eval $(minikube docker-env)
 
@@ -58,7 +62,11 @@ kubectl apply -f clean-data.yml
 kubectl apply -f actuate.yml
 kubectl apply -f aggregate.yml
 
-# 7. Mostrar estat
+# 7. Desplegar Ingress
+echo "Desplegant Ingress..."
+kubectl apply -f ingress.yml
+
+# 8. Mostrar estat
 echo ""
 echo "Desplegament completat!"
 echo ""
@@ -69,3 +77,6 @@ echo ""
 echo "Estat dels serveis:"
 kubectl get services
 
+echo ""
+echo "Ingress:"
+kubectl get ingress

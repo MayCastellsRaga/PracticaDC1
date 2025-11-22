@@ -27,6 +27,7 @@ spec:
   selector:
     app: clean-data
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 5002
       targetPort: 5002

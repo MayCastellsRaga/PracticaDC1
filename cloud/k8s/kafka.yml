@@ -42,9 +42,11 @@ spec:
   selector:
     app: kafka
   ports:
-    - protocol: TCP
+    - name: kafka-internal
+      protocol: TCP
       port: 9092
       targetPort: 9092
-    - protocol: TCP
+    - name: kafka-external
+      protocol: TCP
       port: 29092
       targetPort: 29092

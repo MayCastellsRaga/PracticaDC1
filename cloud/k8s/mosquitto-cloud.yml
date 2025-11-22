@@ -26,6 +26,7 @@ spec:
   selector:
     app: mosquitto-cloud
   ports:
-    - protocol: TCP
+    - name: mqtt
+      protocol: TCP
       port: 1883
       targetPort: 1883
